@@ -45,4 +45,12 @@ models:
       sales:
         +materialized: table
         +schema: marts
-      
+      payments:
+        +materialized: table
+        +schema: marts
+      refunds:
+        +materialized: table
+        +schema: marts
+      shipments:
+        +materialized: table
+        +schema: marts
