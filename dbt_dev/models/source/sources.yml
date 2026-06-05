@@ -1,0 +1,14 @@
+sources:
+  - name: silver
+    database: ecom
+    schema: silver 
+    tables:
+      - name: addresses
+      - name: inventory
+      - name: order_items
+      - name: orders
+      - name: payments
+      - name: products
+      - name: refunds
+      - name: shipments
+      - name: users

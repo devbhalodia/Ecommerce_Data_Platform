@@ -1,0 +1,110 @@
+version: 2
+
+models:
+  - name: stg_silver__users
+    columns:
+      - name: user_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_silver__addresses
+    columns:
+      - name: address_id
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_silver__users')
+              field: user_id
+
+  - name: stg_silver__products
+    columns:
+      - name: product_id
+        data_tests:
+          - unique
+          - not_null
+  
+  - name: stg_silver__inventory
+    columns:
+      - name: product_id
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('stg_silver__products')
+              field: product_id
+  
+  - name: stg_silver__orders
+    columns:
+      - name: order_id
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_silver__users')
+              field: user_id
+
+  - name: stg_silver__order_items
+    columns:
+      - name: order_item_id
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_silver__orders')
+              field: order_id
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_silver__products')
+              field: product_id
+  
+  - name: stg_silver__payments
+    columns:
+      - name: payment_id
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_silver__orders')
+              field: order_id
+  
+  - name: stg_silver__shipments
+    columns:
+      - name: shipment_id
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_silver__orders')
+              field: order_id
+  
+  - name: stg_silver__refunds
+    columns:
+      - name: refund_id
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_silver__orders')
+              field: order_id
