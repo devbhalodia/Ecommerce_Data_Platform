@@ -6,12 +6,9 @@ with cte as (
 
 select 
 e1.shipment_id, 
-e1.carrier, 
-e1.shipped_date, 
+e1.carrier,
 e1.order_id, 
-e1.shipment_status, 
-e1.delivered_date, 
-e1.user_id, 
+e1.shipment_status,
 e2.customer_sk,
 e3.date_sk as shipped_sk,
 e4.date_sk as delivered_sk

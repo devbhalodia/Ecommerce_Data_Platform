@@ -54,3 +54,9 @@ models:
       shipments:
         +materialized: table
         +schema: marts
+      metrics:
+        int_metric_tables:
+          +materialized: view
+          +schema: intermediate
+        +materialized: table
+        +schema: metrics
