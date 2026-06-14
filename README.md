@@ -177,6 +177,8 @@ dbt run -s intermediate marts.dimensions marts.sales marts.refunds marts.shipmen
 Databricks Dashboard refresh
 ```
 
+![Lakeflow DAG](assets/dag_ss.png)
+
 Email notifications fire on pipeline **start**, **success**, and **failure** — zero silent failures.
 
 ---
