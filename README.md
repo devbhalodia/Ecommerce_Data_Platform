@@ -209,6 +209,3 @@ Email notifications fire on pipeline **start**, **success**, and **failure** —
 **Schema drift gating** — the alert runs before any Silver notebook, so a breaking upstream schema change is caught before it can corrupt downstream models.
 
 ---
-
-    └── lakeflow_dag/          → Databricks Lakeflow job definition
-```
