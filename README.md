@@ -122,6 +122,10 @@ One model per Silver table, performing a clean 1:1 read. **40+ dbt tests** (gene
 | `refund_rate` | Refund rate over time |
 | `avg_delivery_days` | Average days from shipment to delivery |
 
+**dbt Lineage Graph**
+
+![dbt Lineage Graph](assets/dbt_lineage_graph.png)
+
 ---
 
 ### Dashboard Layer
