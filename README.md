@@ -6,7 +6,7 @@ An end-to-end data engineering project built on a **medallion architecture** (Br
 
 ## Architecture
 
-![Architecture Diagram](architecture_diagram.png)
+![Architecture Diagram](assets/architecture_diagram.png)
 
 ---
 
@@ -64,8 +64,6 @@ WHERE c.current_column_count > b.expected_column_count;
 
 Built on **Databricks** using **PySpark Structured Streaming** (`readStream`, `trigger=availableNow`). There are **9 notebooks running in parallel**, one per Bronze Delta table. Each notebook follows the same 6-step pipeline:
 
-![Silver Layer Pipeline](silver_pipeline.png)
-
 | Step | Description |
 |---|---|
 | Read | Stream Bronze Delta table from S3 external location |
@@ -101,7 +99,7 @@ One model per Silver table, performing a clean 1:1 read. **40+ dbt tests** (gene
 
 **Marts — Star + Galaxy Schema**
 
-![Galaxy Schema](galaxy_schema.png)
+![Galaxy Schema](assets/galaxy_schema.png)
 
 | Model | Schema type | Description |
 |---|---|---|
@@ -132,7 +130,7 @@ One model per Silver table, performing a clean 1:1 read. **40+ dbt tests** (gene
 
 All 7 metric tables are visualized on a **Databricks Dashboard**, refreshed automatically at the end of every pipeline run.
 
-![Databricks Dashboard](databricks_dashboard.png)
+![Databricks Dashboard](assets/databricks_dashboard.png)
 
 **Live KPIs:**
 - Total Revenue: **$1.02M**
