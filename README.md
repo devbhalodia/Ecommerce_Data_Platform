@@ -1,5 +1,3 @@
-# Ecommerce Lakehouse Pipeline
-
 An end-to-end data engineering project built on a **medallion architecture** (Bronze → Silver → Gold), ingesting CDC events from a simulated PostgreSQL OLTP source, transforming them through PySpark and dbt, and surfacing KPIs on a Databricks dashboard.
 
 ---
