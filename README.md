@@ -1,3 +1,5 @@
+# E-Commerce Data Platform
+
 An end-to-end data engineering project built on a **medallion architecture** (Bronze → Silver → Gold), ingesting CDC events from a simulated PostgreSQL OLTP source, transforming them through PySpark and dbt, and surfacing KPIs on a Databricks dashboard.
 
 ---
@@ -42,7 +44,9 @@ NeonDB (PostgreSQL OLTP) → Fivetran CDC → AWS S3 Delta Lake
 
 ### Schema Drift Alert
 
-Before the Silver layer runs, a SQL-based check compares current column counts in the Bronze Delta tables against a baseline stored in `ecom.monitoring.table_baseline`. If any table has new columns, an **email alert fires immediately**.
+Before the Silver layer runs, a SQL-based check compares current column counts in the Bronze Delta tables against a baseline stored in `ecom.monitoring.table_baseline`. If any table has new columns, an **email alert fires immediately** — serving as an early warning system before Silver execution begins.
+
+Each Silver notebook also performs a **second enforcement layer** — comparing batch columns against the target Silver schema at runtime. If new columns are detected, the entire batch is quarantined with full context, an exception halts the notebook, and the checkpoint does not advance, ensuring the batch replays automatically after the Silver schema is manually updated.
 
 ```sql
 SELECT
@@ -60,16 +64,17 @@ WHERE c.current_column_count > b.expected_column_count;
 
 ### Silver Layer — PySpark Processing
 
-Built on **Databricks** using **PySpark Structured Streaming** (`readStream`, `trigger=availableNow`). There are **9 notebooks running in parallel**, one per Bronze Delta table. Each notebook follows the same 6-step pipeline:
+Built on **Databricks** using **PySpark Structured Streaming** (`readStream`, `trigger=availableNow`). There are **9 notebooks running in parallel**, one per Bronze Delta table. Each notebook follows the same 7-step pipeline:
 
 | Step | Description |
 |---|---|
 | Read | Stream Bronze Delta table from S3 external location |
 | Clean & Cast | Type casting, string trimming, add `_silver_processed_at` timestamp |
 | Dedupe by PK | Window function on PK ordered by `_fivetran_synced DESC`, keep latest record |
-| Segregate | Split into `good_df` (valid PK, valid values) and `bad_df` (null PK, impossible values) |
-| Quarantine | `bad_df` appended to `ecom.silver.<table>_quarantine` with `mergeSchema=True` |
-| SCD Type 1 | `good_df` upserted into `ecom.silver.<table>` via Delta `merge()` on PK |
+| Schema Drift Check | Detect new columns vs Silver schema — quarantine entire batch with context, raise exception to halt notebook and prevent checkpoint advancement |
+| Segregate | Split into `good_df` (valid PK, valid values) and `bad_df` (null PK, impossible values) with granular per-column rejection reasons |
+| Quarantine | `bad_df` appended to `ecom.silver.<table>_quarantine` with `mergeSchema=True` — raises exception if quarantine rate exceeds 5% |
+| SCD Type 1 | `good_df` upserted into `ecom.silver.<table>` via Delta `merge()` on PK — no `mergeSchema`, Silver schema is a strict contract |
 
 **Unity Catalog layout:**
 ```
@@ -190,7 +195,9 @@ Email notifications fire on pipeline **start**, **success**, and **failure** —
 | dbt tests | 40+ (generic + custom) |
 | Tables monitored | 9 |
 | Quarantine tables | 9 (one per entity, bad rows preserved and traceable) |
-| Schema drift detection | Automated, pre-Silver, email alert |
+| Schema drift detection | Two-layer — pre-Silver SQL alert + notebook-level batch quarantine with checkpoint-guaranteed replay |
+| Quarantine threshold alerting | Pipeline halts if bad rows exceed 5% of any batch |
+| Rejection reason granularity | Per-column rejection reasons via `concat_ws` — every quarantined row has a specific failure reason |
 | Pipeline success rate | 100% |
 | Dashboard KPIs | 8 |
 
@@ -210,4 +217,6 @@ Email notifications fire on pipeline **start**, **success**, and **failure** —
 
 **Schema drift gating** — the alert runs before any Silver notebook, so a breaking upstream schema change is caught before it can corrupt downstream models.
 
----
+**Two-layer schema drift defence** — the pre-Silver SQL check serves as an early warning system alerting the engineer proactively. The notebook-level check is the actual enforcement gate — new columns trigger full batch quarantine, exception halts the notebook, and checkpoint non-advancement guarantees batch replay after schema fix. Silver schema is a strict contract; `mergeSchema` is intentionally absent from the Silver merge.
+
+**Quarantine threshold enforcement** — if bad rows exceed 5% of any batch, the pipeline halts immediately via exception, piggybacking on Lakeflow failure notifications. A controlled failure is better than silently propagating degraded data downstream.
