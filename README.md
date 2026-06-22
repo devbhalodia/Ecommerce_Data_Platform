@@ -19,7 +19,7 @@ An end-to-end data engineering project built on a **medallion architecture** (Br
 | Storage | AWS S3 (Delta Lake) |
 | Processing | Databricks (PySpark Structured Streaming) |
 | Transformation | dbt Core |
-| Compute | Databricks SQL Warehouse |
+| Compute | Databricks SQL Warehouse, Serverless |
 | Catalog | Databricks Unity Catalog |
 | Orchestration | Databricks Lakeflow Jobs |
 | Dashboard | Databricks Dashboard |
